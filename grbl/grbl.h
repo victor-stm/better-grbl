@@ -23,7 +23,8 @@
 
 // Grbl versioning system
 #define GRBL_VERSION "1.1h"
-#define GRBL_VERSION_BUILD "20190830"
+#define GRBL_VERSION_BUILD "20230919.3"
+#define GRBL_VERSION_FEATURES "+Backlash\r\n"
 
 // Define standard libraries used by Grbl.
 #include <avr/io.h>
@@ -46,6 +47,7 @@
 #include "defaults.h"
 #include "cpu_map.h"
 #include "planner.h"
+#include "backlash.h"
 #include "coolant_control.h"
 #include "eeprom.h"
 #include "gcode.h"
