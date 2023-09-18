@@ -35,7 +35,7 @@ void mc_line(float *target, plan_line_data_t *pl_data)
   // from everywhere in Grbl.
   if (bit_istrue(settings.flags,BITFLAG_SOFT_LIMIT_ENABLE)) {
     // NOTE: Block jog state. Jogging is a special case and soft limits are handled independently.
-    if (sys.state != STATE_JOG) { limits_soft_check(target); }
+    if (sys.state != STATE_JOG && !(pl_data->condition & (1<<PL_COND_FLAG_BACKLASH_COMP))) { limits_soft_check(target); }
   }
 
   // If in check gcode mode, prevent motion by blocking planner. Soft limits still work.
@@ -54,6 +54,16 @@ void mc_line(float *target, plan_line_data_t *pl_data)
   // indicates to Grbl what is a backlash compensation motion, so that Grbl executes the move but
   // doesn't update the machine position values. Since the position values used by the g-code
   // parser and planner are separate from the system machine positions, this is doable.
+
+  //Determines if the motion we are about to execute has an axis moving in the opposite direction
+  //If it does, the value in settings for that axis is used to determine how far it needs to move
+  //to take up the mechanical slack in the motion for that axis.
+  //This could be a re-entrant call from backlash comp, so if it is, we dont want to 'comp the comp move'
+
+  if (!(pl_data->condition &(1<<PL_COND_FLAG_BACKLASH_COMP)))
+  {
+    backlash_comp(target, pl_data);
+  }
 
   // If the buffer is full: good! That means we are well ahead of the robot.
   // Remain in this loop until there is room in the buffer.
